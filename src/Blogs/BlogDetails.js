@@ -349,7 +349,7 @@ const BlogDetails = () => {
       {toast && (
         <div
           className="toast d-block justify-content-end text-white bg-primary border-0"
-          style={{ position: "fixed", top: 0, right: 0 }}
+          style={{ position: "fixed", top: 10, right: 0 }}
         >
           <div className="d-flex">
             <div className="toast-body">{message}</div>

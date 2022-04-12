@@ -1,25 +1,32 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 const Blogs = () => {
+  const [searchParams] = useSearchParams();
+
+  // react hook
   const [blogs, setBlogs] = useState([]);
   const [modal, setModal] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState({});
   const [toast, setToast] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 12,
+  });
 
   // blogs api function
-  const blogAPICall = async () => {
+  const blogAPICall = async (page, limit) => {
     await axios
-      .get("http://localhost:5000/")
-      .then((res) => setBlogs(res.data.data));
+      .get(`http://localhost:5000/?page=${page}&limit=${limit}`)
+      .then((res) => setBlogs(res.data));
   };
 
   // blogs api call
   useEffect(() => {
-    blogAPICall();
-  }, []);
+    blogAPICall(pagination.page, pagination.limit);
+  }, [pagination]);
 
   // handle form submit blog create
   const handleFormSubmit = async (e) => {
@@ -39,21 +46,52 @@ const Blogs = () => {
           setError({});
           setToast(false);
           setModal(false);
-          blogAPICall();
+          blogAPICall(pagination.page, pagination.limit);
           document.getElementById("myForm").reset();
         }, 1500);
       })
       .catch((error) => setError(error.response.data));
   };
-
   // handle modal open
   const handleCreateModalOpen = () => {
     setModal(true);
   };
-
   // handle modal close
   const handleCreateModalClose = () => {
     setModal(false);
+  };
+
+  // total page list
+  let totalPage = [];
+
+  // pagination
+  for (let i = 1; i <= blogs.pages; i++) {
+    totalPage.push(i);
+  }
+
+  console.log(totalPage);
+
+  // handle pagination
+  const handlePagination = (page) => {
+    setPagination({ page: page, limit: 12 });
+  };
+
+  // Previous
+  const handlePrevious = () => {
+    if (pagination.page === 1) {
+      setPagination({ page: 1, limit: 12 });
+    } else {
+      setPagination({ page: pagination.page - 1, limit: 12 });
+    }
+  };
+
+  // next
+  const handleNext = () => {
+    if (pagination.page === blogs.pages) {
+      setPagination({ page: blogs.pages, limit: 12 });
+    } else {
+      setPagination({ page: pagination.page + 1, limit: 12 });
+    }
   };
 
   return (
@@ -74,7 +112,7 @@ const Blogs = () => {
             </div>
           </div>
 
-          {blogs.length === 0 ? (
+          {blogs?.data?.length === 0 ? (
             <div className="row">
               <div className="col text-center">
                 <div className="d-flex justify-content-center">
@@ -87,7 +125,7 @@ const Blogs = () => {
           ) : (
             <>
               <div className="row">
-                {blogs.map((blog) => (
+                {blogs?.data?.map((blog) => (
                   <div className="col-3" key={blog._id}>
                     <div className="card mb-4">
                       <div className="card-body">
@@ -112,31 +150,50 @@ const Blogs = () => {
                 <div className="col">
                   <nav>
                     <ul className="pagination">
-                      <li className="page-item disabled">
-                        <span className="page-link">Previous</span>
-                      </li>
+                      {pagination.page === 1 ? (
+                        <li className="page-item disabled">
+                          <span className="page-link">Previous</span>
+                        </li>
+                      ) : (
+                        <li onClick={handlePrevious} className="page-item">
+                          <Link className="page-link" to="#">
+                            Previous
+                          </Link>
+                        </li>
+                      )}
 
-                      <li className="page-item">
-                        <Link className="page-link" to="#">
-                          1
-                        </Link>
-                      </li>
+                      {totalPage.map((index) => {
+                        return (
+                          <>
+                            {pagination.page === index ? (
+                              <li className="page-item active">
+                                <span className="page-link">{index}</span>
+                              </li>
+                            ) : (
+                              <li
+                                onClick={() => handlePagination(index)}
+                                className="page-item"
+                              >
+                                <Link className="page-link" to={`#`}>
+                                  {index}
+                                </Link>
+                              </li>
+                            )}
+                          </>
+                        );
+                      })}
 
-                      <li className="page-item active">
-                        <span className="page-link">2</span>
-                      </li>
-
-                      <li className="page-item">
-                        <Link className="page-link" to="#">
-                          3
-                        </Link>
-                      </li>
-
-                      <li className="page-item">
-                        <Link className="page-link" to="#">
-                          Next
-                        </Link>
-                      </li>
+                      {pagination.page === blogs.pages ? (
+                        <li className="page-item disabled">
+                          <span className="page-link">Next</span>
+                        </li>
+                      ) : (
+                        <li onClick={handleNext} className="page-item">
+                          <Link className="page-link" to="#">
+                            Next
+                          </Link>
+                        </li>
+                      )}
                     </ul>
                   </nav>
                 </div>
@@ -233,7 +290,7 @@ const Blogs = () => {
       {toast && (
         <div
           className="toast d-block justify-content-end text-white bg-primary border-0"
-          style={{ position: "fixed", top: 20, right: 0 }}
+          style={{ position: "fixed", top: 10, right: 0 }}
         >
           <div className="d-flex">
             <div className="toast-body">{message}</div>
