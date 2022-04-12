@@ -1,10 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Blogs = () => {
-  const [searchParams] = useSearchParams();
-
   // react hook
   const [blogs, setBlogs] = useState([]);
   const [modal, setModal] = useState(false);
@@ -19,7 +17,9 @@ const Blogs = () => {
   // blogs api function
   const blogAPICall = async (page, limit) => {
     await axios
-      .get(`http://localhost:5000/?page=${page}&limit=${limit}`)
+      .get(
+        `https://simple-blog-2022.herokuapp.com/?page=${page}&limit=${limit}`
+      )
       .then((res) => setBlogs(res.data));
   };
 
@@ -38,7 +38,7 @@ const Blogs = () => {
     const createFormData = Object.fromEntries(formData.entries());
 
     await axios
-      .post("http://localhost:5000/", createFormData)
+      .post("https://simple-blog-2022.herokuapp.com/", createFormData)
       .then((res) => {
         setMessage(res.data.message);
         setToast(true);

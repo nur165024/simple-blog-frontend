@@ -18,7 +18,7 @@ const BlogDetails = () => {
   // handle blog details api call function
   const blogDetailsAPICall = async (id) => {
     await axios
-      .get(`http://localhost:5000/${id}`)
+      .get(`https://simple-blog-2022.herokuapp.com/${id}`)
       .then((res) => setDetails(res.data.data))
       .catch((error) => console.log(error));
   };
@@ -38,7 +38,10 @@ const BlogDetails = () => {
     const createFormData = Object.fromEntries(formData.entries());
 
     await axios
-      .post(`http://localhost:5000/comment/${blogId}`, createFormData)
+      .post(
+        `https://simple-blog-2022.herokuapp.com/comment/${blogId}`,
+        createFormData
+      )
       .then((res) => {
         setMessage(res.data.message);
         setToast(true);
@@ -63,7 +66,7 @@ const BlogDetails = () => {
 
     await axios
       .post(
-        `http://localhost:5000/children/comment/${blogId}/${childrenCommentId}`,
+        `https://simple-blog-2022.herokuapp.com/children/comment/${blogId}/${childrenCommentId}`,
         createFormData
       )
       .then((res) => {
